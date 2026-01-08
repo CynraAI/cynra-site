@@ -28,6 +28,9 @@
             if (logo) logo.classList.add('visible');
             if (textContent) textContent.classList.add('visible');
             if (ctaSection) ctaSection.classList.add('visible');
+
+            // Still wire up CTA interactions
+            initWaitlist();
             return;
         }
 
@@ -41,20 +44,109 @@
             return;
         }
 
-        // Step 1: Logo fades in + scale (0ms delay, 700ms duration)
-        setTimeout(() => {
-            logo.classList.add('visible');
-        }, 0);
+        // Step 1: Wait for logo to load, then show it with a slight delay
+        function showLogoWhenReady() {
+            const logoDelay = 500; // ms after page is ready before logo appears
+            const textDelayAfterLogo = 800; // ms after logo
+            const ctaDelayAfterLogo = 1100; // ms after logo
 
-        // Step 2: Text fades in after 400ms delay (350-450ms range, using 400ms)
-        setTimeout(() => {
-            textContent.classList.add('visible');
-        }, 400);
+            if (logo.complete && logo.naturalHeight !== 0) {
+                // Logo already loaded - still wait a bit so background shows first
+                setTimeout(() => {
+                    logo.classList.add('visible');
 
-        // Step 3: CTA appears after another 300ms delay (total ~700ms after text)
-        setTimeout(() => {
-            ctaSection.classList.add('visible');
-        }, 1100);
+                    // Step 2: Text fades in after a delay (after logo is visible)
+                    setTimeout(() => {
+                        textContent.classList.add('visible');
+                    }, textDelayAfterLogo);
+
+                    // Step 3: CTA appears after another delay
+                    setTimeout(() => {
+                        ctaSection.classList.add('visible');
+                    }, ctaDelayAfterLogo);
+                }, logoDelay);
+            } else {
+                // Wait for logo to load
+                logo.addEventListener('load', () => {
+                    setTimeout(() => {
+                        logo.classList.add('visible');
+
+                        // Step 2: Text fades in after a delay (after logo is visible)
+                        setTimeout(() => {
+                            textContent.classList.add('visible');
+                        }, textDelayAfterLogo);
+
+                        // Step 3: CTA appears after another delay
+                        setTimeout(() => {
+                            ctaSection.classList.add('visible');
+                        }, ctaDelayAfterLogo);
+                    }, logoDelay);
+                });
+                // Fallback: if image fails to load or takes too long, show after 1 second
+                setTimeout(() => {
+                    if (!logo.classList.contains('visible')) {
+                        setTimeout(() => {
+                            logo.classList.add('visible');
+
+                            setTimeout(() => {
+                                textContent.classList.add('visible');
+                            }, textDelayAfterLogo);
+
+                            setTimeout(() => {
+                                ctaSection.classList.add('visible');
+                            }, ctaDelayAfterLogo);
+                        }, logoDelay);
+                    }
+                }, 1000);
+            }
+        }
+
+        showLogoWhenReady();
+
+        // Set up waitlist CTA interactions
+        initWaitlist();
+    }
+
+    // Waitlist / "Get updates" interactions
+    function initWaitlist() {
+        const getUpdatesButton = document.getElementById('getUpdatesButton');
+        const waitlistForm = document.getElementById('waitlistForm');
+        const waitlistEmail = document.getElementById('waitlistEmail');
+        const waitlistMessage = document.getElementById('waitlistMessage');
+
+        if (!getUpdatesButton || !waitlistForm || !waitlistEmail || !waitlistMessage) {
+            return;
+        }
+
+        // Initially hide form & message
+        waitlistForm.style.display = 'none';
+        waitlistMessage.textContent = '';
+
+        getUpdatesButton.addEventListener('click', () => {
+            getUpdatesButton.style.display = 'none';
+            waitlistForm.style.display = 'flex';
+            waitlistEmail.focus();
+        });
+
+        waitlistForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const emailValue = (waitlistEmail.value || '').trim();
+
+            // Very lightweight email check
+            if (!emailValue || !emailValue.includes('@')) {
+                waitlistMessage.textContent = 'Please enter a valid email address.';
+                waitlistMessage.classList.add('waitlist-message--error');
+                return;
+            }
+
+            // Clear any previous error state
+            waitlistMessage.classList.remove('waitlist-message--error');
+
+            // Simulate successful subscription (you can hook this to a real backend later)
+            waitlistForm.style.display = 'none';
+            waitlistMessage.textContent = 'Thanks — we\'ll send you updates when Cynra launches.';
+        });
     }
 
     // Initialize when DOM is ready

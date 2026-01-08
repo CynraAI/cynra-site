@@ -184,6 +184,83 @@ body::after {
     transform: translateY(0);
 }
 
+/* Waitlist inline form */
+.waitlist-form {
+    display: none;
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.waitlist-input {
+    min-width: 220px;
+    padding: 0.7rem 0.9rem;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.6);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.waitlist-input::placeholder {
+    color: var(--text-tertiary);
+}
+
+.waitlist-input:focus {
+    border-color: var(--accent-green);
+    box-shadow: 0 0 0 1px rgba(0, 227, 140, 0.4);
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.waitlist-submit {
+    padding: 0.75rem 1.6rem;
+    border-radius: 6px;
+    border: none;
+    background: var(--accent-green);
+    color: var(--bg-darker);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.waitlist-submit:hover {
+    background: var(--accent-green-bright);
+    box-shadow: 0 0 18px rgba(0, 227, 140, 0.3);
+    transform: translateY(-1px);
+}
+
+.waitlist-submit:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.waitlist-message {
+    margin-top: 0.9rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.waitlist-message--error {
+    color: #ff6b6b;
+}
+
+.visually-hidden {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+}
+
 /* Social Links (alternative CTA option) */
 .social-links {
     display: flex;
@@ -273,6 +350,20 @@ body::after {
         font-size: 0.95rem;
     }
 
+    .waitlist-form {
+        width: 100%;
+        gap: 0.6rem;
+    }
+
+    .waitlist-input {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .waitlist-submit {
+        padding-inline: 1.4rem;
+    }
+
     .social-links {
         gap: 1.25rem;
     }
@@ -284,11 +375,11 @@ body::after {
     }
 
     .logo-wrapper {
-        margin-top: 6rem;
+        margin-top: 4.5rem;
     }
 
     .text-content {
-        margin-top: -1.5rem;
+        margin-top: -1rem;
     }
 
     .content {
@@ -298,6 +389,16 @@ body::after {
     .cta-button {
         padding: 0.7rem 1.5rem;
         font-size: 0.9rem;
+    }
+
+    .waitlist-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .waitlist-input,
+    .waitlist-submit {
+        width: 100%;
     }
 }
 

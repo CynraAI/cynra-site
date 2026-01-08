@@ -1,28 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Cynra - AI-driven market analytics engine for modern traders. Currently under redevelopment.">
+    <meta name="description"
+        content="Cynra - AI-driven market analytics engine for modern traders. Currently under redevelopment.">
     <title>Cynra</title>
     <link rel="stylesheet" href="styles.css">
+    <!-- Preload logo to ensure it loads first -->
+    <link rel="preload" href="./cynra-logo.png" as="image">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <!-- Favicon placeholder - replace with actual favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
 </head>
+
 <body>
     <div class="container">
         <div class="content">
             <!-- Logo + Wordmark -->
             <div class="logo-wrapper">
-                <img 
-                    src="./cynra-logo.png" 
-                    alt="Cynra Logo" 
-                    class="logo"
-                    id="logo"
-                >
+                <img src="./cynra-logo.png" alt="Cynra Logo" class="logo" id="logo">
                 <!-- Note: If you relocate the logo (e.g., to /assets/), update the src above -->
             </div>
 
@@ -34,17 +35,25 @@
 
             <!-- CTA Section -->
             <div class="cta-section" id="ctaSection">
-                <!-- Option 1: Social Links (uncomment to use) -->
-                <!--
-                <div class="social-links">
-                    <a href="#" class="social-link" aria-label="X (Twitter)">X</a>
-                    <a href="#" class="social-link" aria-label="Instagram">Instagram</a>
-                    <a href="#" class="social-link" aria-label="YouTube">YouTube</a>
-                </div>
-                -->
-                <!-- Option 2: Get Updates Button (currently active) -->
-                <a href="mailto:hello@cynra.ai" class="cta-button">Get updates</a>
-                <!-- Note: Replace mailto link with waitlist form URL when ready -->
+                <!-- Get Updates CTA -->
+                <button type="button" class="cta-button" id="getUpdatesButton">
+                    Get updates
+                </button>
+
+                <!-- Inline waitlist form (revealed after clicking "Get updates") -->
+                <form id="waitlistForm" class="waitlist-form" novalidate>
+                    <label class="visually-hidden" for="waitlistEmail">
+                        Enter your email to get updates when we launch
+                    </label>
+                    <input id="waitlistEmail" class="waitlist-input" type="email" name="email"
+                        placeholder="you@example.com" required>
+                    <button type="submit" class="waitlist-submit">
+                        Notify me
+                    </button>
+                </form>
+
+                <!-- Confirmation message shown after form submission -->
+                <p id="waitlistMessage" class="waitlist-message" aria-live="polite"></p>
             </div>
         </div>
 
@@ -56,5 +65,5 @@
 
     <script src="main.js"></script>
 </body>
-</html>
 
+</html>
