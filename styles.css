@@ -343,11 +343,20 @@ body::after {
 
     .headline {
         margin-bottom: 0.75rem;
+        font-size: clamp(1.5rem, 5vw, 2rem);
+    }
+
+    .subtext {
+        font-size: clamp(0.9rem, 3vw, 1rem);
     }
 
     .cta-button {
         padding: 0.75rem 1.75rem;
         font-size: 0.95rem;
+    }
+
+    .waitlist-message {
+        font-size: 0.85rem;
     }
 
     .waitlist-form {
@@ -386,9 +395,21 @@ body::after {
         gap: 1.75rem;
     }
 
+    .headline {
+        font-size: clamp(1.35rem, 5.5vw, 1.75rem);
+    }
+
+    .subtext {
+        font-size: clamp(0.85rem, 3.5vw, 0.95rem);
+    }
+
     .cta-button {
         padding: 0.7rem 1.5rem;
         font-size: 0.9rem;
+    }
+
+    .waitlist-message {
+        font-size: 0.8rem;
     }
 
     .waitlist-form {
