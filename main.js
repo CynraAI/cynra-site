@@ -107,6 +107,85 @@
         initWaitlist();
     }
 
+    // Initialize Supabase client
+    let supabaseClient = null;
+    let supabaseEdgeFunctionUrl = null;
+
+    function initSupabase() {
+        if (typeof SUPABASE_CONFIG === 'undefined' || !SUPABASE_CONFIG.url || !SUPABASE_CONFIG.anonKey) {
+            console.warn('[Cynra] Supabase not configured. Emails will only be stored locally.');
+            return;
+        }
+
+        try {
+            // Initialize Supabase client
+            supabaseClient = window.supabase.createClient(
+                SUPABASE_CONFIG.url,
+                SUPABASE_CONFIG.anonKey
+            );
+
+            // Construct Edge Function URL
+            supabaseEdgeFunctionUrl = `${SUPABASE_CONFIG.url}/functions/v1/store-waitlist-email`;
+
+            console.log('[Cynra] Supabase initialized successfully');
+        } catch (err) {
+            console.error('[Cynra] Failed to initialize Supabase:', err);
+        }
+    }
+
+    // Store email in Supabase (encrypted via Edge Function)
+    async function storeEmailInSupabase(email) {
+        if (!supabaseEdgeFunctionUrl || !SUPABASE_CONFIG.anonKey) {
+            throw new Error('Supabase not configured');
+        }
+
+        try {
+            const response = await fetch(supabaseEdgeFunctionUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${SUPABASE_CONFIG.anonKey}`,
+                },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to store email');
+            }
+
+            return data;
+        } catch (err) {
+            console.error('[Cynra] Supabase storage error:', err);
+            throw err;
+        }
+    }
+
+    // Store email submissions in localStorage (backup/client-side log)
+    function logWaitlistEmail(email) {
+        try {
+            const key = 'cynra_waitlist_log';
+            const existingRaw = window.localStorage.getItem(key);
+            const existing = existingRaw ? JSON.parse(existingRaw) : [];
+
+            const entry = {
+                email,
+                timestamp: new Date().toISOString()
+            };
+
+            existing.push(entry);
+            window.localStorage.setItem(key, JSON.stringify(existing));
+
+            // Also log to console for quick inspection during development
+            // eslint-disable-next-line no-console
+            console.log('[Cynra waitlist] Logged email locally:', entry);
+        } catch (err) {
+            // eslint-disable-next-line no-console
+            console.warn('Unable to log waitlist email locally', err);
+        }
+    }
+
     // Waitlist / "Get updates" interactions
     function initWaitlist() {
         const getUpdatesButton = document.getElementById('getUpdatesButton');
@@ -128,10 +207,11 @@
             waitlistEmail.focus();
         });
 
-        waitlistForm.addEventListener('submit', (event) => {
+        waitlistForm.addEventListener('submit', async (event) => {
             event.preventDefault();
 
             const emailValue = (waitlistEmail.value || '').trim();
+            const submitButton = waitlistForm.querySelector('.waitlist-submit');
 
             // Very lightweight email check
             if (!emailValue || !emailValue.includes('@')) {
@@ -143,15 +223,53 @@
             // Clear any previous error state
             waitlistMessage.classList.remove('waitlist-message--error');
 
-            // Simulate successful subscription (you can hook this to a real backend later)
-            waitlistForm.style.display = 'none';
-            waitlistMessage.textContent = 'Thanks — we\'ll send you updates when Cynra launches.';
+            // Disable submit button and show loading state
+            if (submitButton) {
+                submitButton.disabled = true;
+                const originalText = submitButton.textContent;
+                submitButton.textContent = 'Saving...';
+            }
+
+            try {
+                // Try to store in Supabase (encrypted)
+                if (supabaseClient && supabaseEdgeFunctionUrl) {
+                    try {
+                        await storeEmailInSupabase(emailValue);
+                        console.log('[Cynra] Email stored in Supabase successfully');
+                    } catch (supabaseError) {
+                        console.warn('[Cynra] Supabase storage failed, falling back to local storage:', supabaseError);
+                        // Fall back to local storage if Supabase fails
+                        logWaitlistEmail(emailValue);
+                    }
+                } else {
+                    // Supabase not configured, use local storage
+                    logWaitlistEmail(emailValue);
+                }
+
+                // Show success message
+                waitlistForm.style.display = 'none';
+                waitlistMessage.textContent = 'Thanks — we\'ll send you updates when Cynra launches.';
+
+            } catch (error) {
+                console.error('[Cynra] Error storing email:', error);
+                waitlistMessage.textContent = 'Something went wrong. Please try again.';
+                waitlistMessage.classList.add('waitlist-message--error');
+                
+                // Re-enable submit button
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Notify me';
+                }
+            }
         });
     }
 
     // Initialize when DOM is ready
     function init() {
         setCurrentYear();
+        
+        // Initialize Supabase
+        initSupabase();
         
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initAnimations);
