@@ -89,13 +89,31 @@ body::after {
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
 }
 
 /* Logo Styles */
 .logo-wrapper {
-    position: relative;
-    margin-bottom: 0;
-    margin-top: 16rem;
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    margin: 0;
+    width: 100%;
+    max-width: 580px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+}
+
+.logo-wrapper .logo.hidden {
+    pointer-events: none;
 }
 
 .logo {
@@ -115,12 +133,20 @@ body::after {
     transform: scale(1);
 }
 
+.logo.hidden {
+    opacity: 0;
+    transform: scale(0.95);
+    pointer-events: none;
+}
+
 /* Text Content */
 .text-content {
     opacity: 0;
     transform: translateY(8px);
     transition: opacity 0.5s ease-out, transform 0.5s ease-out;
     margin-top: 0.5rem;
+    position: relative;
+    z-index: 1;
 }
 
 .text-content.visible {
@@ -152,11 +178,15 @@ body::after {
     transform: translateY(8px);
     transition: opacity 0.5s ease-out, transform 0.5s ease-out;
     margin-top: 0.5rem;
+    position: relative;
+    z-index: 20;
+    pointer-events: none;
 }
 
 .cta-section.visible {
     opacity: 1;
     transform: translateY(0);
+    pointer-events: auto;
 }
 
 .cta-button {
@@ -171,6 +201,10 @@ body::after {
     background: rgba(0, 227, 140, 0.05);
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
+    cursor: pointer;
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 21;
 }
 
 .cta-button:hover {
@@ -188,7 +222,6 @@ body::after {
 .waitlist-form {
     display: none;
     margin-top: 0.75rem;
-    display: flex;
     gap: 0.5rem;
     justify-content: center;
     align-items: center;
@@ -286,9 +319,13 @@ body::after {
 
 /* Footer */
 .footer {
-    margin-top: auto;
-    padding-top: 3rem;
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
     text-align: center;
+    z-index: 1;
 }
 
 .footer p {
@@ -327,18 +364,21 @@ body::after {
 
     .content {
         gap: 2rem;
+        max-width: 90%;
     }
 
     .logo {
         max-width: 400px;
+        width: 100%;
     }
 
     .logo-wrapper {
-        margin-top: 7rem;
+        top: 30%;
+        max-width: 90%;
     }
 
     .text-content {
-        margin-top: -2rem;
+        margin-top: 0.5rem;
     }
 
     .headline {
@@ -380,19 +420,22 @@ body::after {
 
 @media (max-width: 480px) {
     .logo {
-        max-width: 320px;
+        max-width: 280px;
+        width: 100%;
     }
 
     .logo-wrapper {
-        margin-top: 4.5rem;
+        top: 28%;
+        max-width: 85%;
     }
 
     .text-content {
-        margin-top: -1rem;
+        margin-top: 0.5rem;
     }
 
     .content {
         gap: 1.75rem;
+        max-width: 95%;
     }
 
     .headline {
