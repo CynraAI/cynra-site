@@ -287,6 +287,148 @@
         }, 100);
     }
 
+    // Legal tab interactions
+    function initLegalTab() {
+        const closeButton = document.querySelector('[data-close-legal]');
+        const legalTab = document.querySelector('.legal-tab');
+        const legalTrigger = document.querySelector('.legal-tab-trigger');
+
+        if (!closeButton || !legalTab || !legalTrigger) {
+            return;
+        }
+
+        closeButton.addEventListener('click', () => {
+            if (legalTab.hasAttribute('open')) {
+                legalTrigger.click();
+            }
+
+            legalTrigger.focus();
+        });
+    }
+
+    // Animate <details> open/close for legal sections
+    function initDetailsAnimations() {
+        if (prefersReducedMotion()) {
+            return;
+        }
+
+        const detailsElements = document.querySelectorAll('.legal-tab, .legal-item');
+
+        function setExpandedState(summary, isExpanded) {
+            summary.setAttribute('aria-expanded', String(isExpanded));
+        }
+
+        function getOrCreateContentWrapper(details, summary) {
+            let content = details.querySelector(':scope > .details-animated-content');
+            if (content) {
+                return content;
+            }
+
+            content = document.createElement('div');
+            content.className = 'details-animated-content';
+
+            let nextNode = summary.nextSibling;
+            while (nextNode) {
+                const currentNode = nextNode;
+                nextNode = nextNode.nextSibling;
+                content.appendChild(currentNode);
+            }
+
+            details.appendChild(content);
+            return content;
+        }
+
+        function animateDetails(details, summary, content, shouldOpen) {
+            const existingEnd = content._detailsTransitionEnd;
+            if (existingEnd) {
+                content.removeEventListener('transitionend', existingEnd);
+                content._detailsTransitionEnd = null;
+            }
+
+            if (!shouldOpen) {
+                content.style.transition = 'none';
+                content.style.willChange = '';
+                content.style.overflow = 'hidden';
+                const currentHeight = content.getBoundingClientRect().height;
+                content.style.height = `${currentHeight}px`;
+                void content.offsetHeight;
+                content.style.height = '0px';
+                content.style.opacity = '0';
+                details.removeAttribute('open');
+                content.style.transition = '';
+                content.style.overflow = '';
+                return;
+            }
+
+            const duration = 260;
+            const easing = 'cubic-bezier(0.2, 0.65, 0.25, 1)';
+            const currentHeight = content.getBoundingClientRect().height;
+
+            content.style.overflow = 'hidden';
+            content.style.willChange = 'height, opacity';
+            content.style.transition = 'none';
+            content.style.height = `${currentHeight}px`;
+            content.style.opacity = '0';
+
+            details.setAttribute('open', '');
+
+            // Force style flush so the transition can run
+            void content.offsetHeight;
+
+            const targetHeight = content.scrollHeight;
+            content.style.transition = `height ${duration}ms ${easing}, opacity ${duration - 30}ms ease`;
+            content.style.height = `${targetHeight}px`;
+            content.style.opacity = '1';
+
+            const onTransitionEnd = (event) => {
+                if (event.propertyName !== 'height') {
+                    return;
+                }
+
+                content.style.height = 'auto';
+                content.style.transition = '';
+                content.style.willChange = '';
+                content.style.overflow = '';
+                content.removeEventListener('transitionend', onTransitionEnd);
+                content._detailsTransitionEnd = null;
+            };
+
+            content._detailsTransitionEnd = onTransitionEnd;
+            content.addEventListener('transitionend', onTransitionEnd);
+        }
+
+        detailsElements.forEach((details) => {
+            const summary = details.querySelector(':scope > summary');
+            if (!summary) {
+                return;
+            }
+
+            const content = getOrCreateContentWrapper(details, summary);
+            const isOpen = details.hasAttribute('open');
+
+            content.style.overflow = 'hidden';
+            content.style.height = isOpen ? 'auto' : '0px';
+            content.style.opacity = isOpen ? '1' : '0';
+            setExpandedState(summary, isOpen);
+
+            summary.addEventListener('click', (event) => {
+                event.preventDefault();
+                const shouldOpen = !details.hasAttribute('open');
+                setExpandedState(summary, shouldOpen);
+                animateDetails(details, summary, content, shouldOpen);
+
+                if (shouldOpen && details.classList.contains('legal-tab')) {
+                    setTimeout(() => {
+                        details.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }, 70);
+                }
+            });
+        });
+    }
+
     // Initialize when DOM is ready
     function init() {
         setCurrentYear();
@@ -299,11 +441,15 @@
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
                 initWaitlist();
+                initLegalTab();
+                initDetailsAnimations();
                 initAnimations();
             });
         } else {
             // DOM already loaded
             initWaitlist();
+            initLegalTab();
+            initDetailsAnimations();
             initAnimations();
         }
     }
